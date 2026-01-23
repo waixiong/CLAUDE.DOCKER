@@ -1,0 +1,9 @@
+# Exclude sensitive and build files
+.env
+.env.*
+CLAUDE.DOCKER/
+
+# Common excludes
+node_modules/
+.git/
+*.log
