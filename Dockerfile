@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-LABEL maintainer="lunding-rater"
+LABEL maintainer="Buildex Claude"
 LABEL description="Ubuntu container with Claude Code CLI"
 
 # Avoid prompts during package installation
@@ -22,7 +22,16 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 # Install Claude Code CLI globally
 RUN npm install -g @anthropic-ai/claude-code
 
-# Create workspace directory
+# Create non-root user 'claude'
+RUN useradd -m -s /bin/bash claude
+
+# Create workspace directory and set ownership
+RUN mkdir -p /workspace && chown -R claude:claude /workspace
+
+# Switch to non-root user
+USER claude
+
+# Set working directory
 WORKDIR /workspace
 
 # Volume will be mounted at runtime (excluding .env and CLAUDE.DOCKER)
