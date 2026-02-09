@@ -14,16 +14,16 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js (LTS)
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Claude Code CLI globally
-RUN npm install -g @anthropic-ai/claude-code
-
 # Create non-root user 'claude'
 RUN useradd -m -s /bin/bash claude
+
+# Install Claude Code CLI as the claude user (native installation)
+USER claude
+RUN curl -fsSL https://claude.ai/install.sh | bash
+USER root
+
+# Ensure claude binary is in PATH for all shell types
+ENV PATH="/home/claude/.local/bin:${PATH}"
 
 # Create workspace directory and set ownership
 RUN mkdir -p /workspace && chown -R claude:claude /workspace

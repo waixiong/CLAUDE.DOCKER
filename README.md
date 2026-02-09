@@ -11,28 +11,46 @@ docker build -t claude-code .
 
 ## Run the Container
 
-### Interactive Shell
+### Using the Run Script (Recommended)
 
-Mount the project directory (excluding .env, data, or any sensitive paths):
+The `run.sh` script handles workspace mounting with exclusions for `.env` and `data` by default:
 
 ```bash
-# From project root
-docker run -it --rm \
-    -v "$(pwd)":/workspace \
-    -v /workspace/.env \
-    -v /workspace/data \
-    claude-code
+# From project root (mounts current directory)
+./CLAUDE.DOCKER/run.sh
+
+# Mount a specific directory
+./CLAUDE.DOCKER/run.sh /path/to/project
+
+# Run claude directly
+./CLAUDE.DOCKER/run.sh . claude
+
+# Run with flags
+./CLAUDE.DOCKER/run.sh . claude --dangerously-skip-permissions
 ```
 
-The `-v /workspace/.env` and `-v /workspace/data` flags create anonymous volumes that shadow those paths, effectively excluding them from the bind mount.
+To customize exclusions, edit the `EXCLUSIONS` array in `run.sh`.
+
+### Manual Docker Run
+
+Use `--mount type=tmpfs` to exclude files/folders (creates empty tmpfs overlay):
+
+```bash
+docker run -it --rm \
+    -v "$(pwd)":/workspace \
+    --mount type=tmpfs,destination=/workspace/.env \
+    --mount type=tmpfs,destination=/workspace/data \
+    -e ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" \
+    claude-code
+```
 
 ### Run a Single Command
 
 ```bash
 docker run -it --rm \
     -v "$(pwd)":/workspace \
-    -v /workspace/.env \
-    -v /workspace/data \
+    --mount type=tmpfs,destination=/workspace/.env \
+    --mount type=tmpfs,destination=/workspace/data \
     claude-code claude --help
 ```
 
@@ -41,8 +59,8 @@ docker run -it --rm \
 ```bash
 docker run -it --rm \
     -v "$(pwd)":/workspace \
-    -v /workspace/.env \
-    -v /workspace/data \
+    --mount type=tmpfs,destination=/workspace/.env \
+    --mount type=tmpfs,destination=/workspace/data \
     -e ANTHROPIC_API_KEY="your-api-key" \
     claude-code claude
 ```
